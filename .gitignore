@@ -1,0 +1,15 @@
+# Dify credentials and local runtime
+dify-knowledge-bridge/.env
+dify-knowledge-bridge/.venv/
+dify-knowledge-bridge/last_result.json
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+.pytest_cache/
+
+# Local outputs
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

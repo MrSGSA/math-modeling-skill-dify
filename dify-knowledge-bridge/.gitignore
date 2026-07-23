@@ -1,0 +1,5 @@
+.env
+.venv/
+last_result.json
+__pycache__/
+*.pyc
