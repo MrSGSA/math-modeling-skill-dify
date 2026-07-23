@@ -9,12 +9,13 @@
 
 任何参考文档中的相对路径均以其所属 `SKILL.md` 目录为基准。角色文档通过 `../../..` 回到 `SKILL_ROOT`。
 
-## 三角色
+## 四角色
 
 | 阶段 | 入口 | 固定交付物 |
 |---|---|---|
 | 建模分析 | `roles/建模手/SKILL.md` | `题目分析报告.md`、`术语表格.md` |
 | 代码实现 | `roles/编程手/SKILL.md` | Python/MATLAB 代码、结果表格、三类图、复现清单 |
+| 红队评审 | `roles/model-reviewer/SKILL.md` | 内部结果注册表与评审审计，不作为额外最终交付物 |
 | 论文撰写 | `roles/论文手/SKILL.md` | `完整论文.docx` |
 
 ## 按任务加载
@@ -26,6 +27,7 @@
 | 选模型 | `roles/建模手/references/建模设计理论.md` |
 | 查具体算法 | `算法索引.md`，再读取一个匹配的 `../assets/*.md` |
 | Python/MATLAB 实现 | `roles/编程手/references/工作流程.md` |
+| 红队评审门、主张证据与最优性措辞 | `评审门与证据等级.md`、`roles/model-reviewer/SKILL.md` |
 | MATLAB 工具箱与出图 | `roles/编程手/references/MATLAB规范.md` |
 | 可视化 | `roles/编程手/references/可视化规范.md` |
 | 论文结构 | `roles/论文手/references/章节模板.md` |

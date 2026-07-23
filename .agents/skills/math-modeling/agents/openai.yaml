@@ -1,7 +1,7 @@
 interface:
   display_name: "数学建模工作流"
-  short_description: "三角色建模、练习复盘、论文交付与九库多模态检索工作流"
-  default_prompt: "使用 $math-modeling 完成题目分析、模型设计、代码求解和论文交付，并优先检索已接入的数学建模知识库。"
+  short_description: "四角色建模、红队评审、论文交付与九库多模态检索工作流"
+  default_prompt: "使用 $math-modeling 完成题目分析、代码求解、红队评审和论文交付，并优先检索已接入的数学建模知识库。"
 
 dependencies:
   tools:

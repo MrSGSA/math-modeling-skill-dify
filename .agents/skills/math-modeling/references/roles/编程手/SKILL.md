@@ -21,6 +21,7 @@ description: 数学建模的 Python 或 MATLAB 实现、运行、表格输出、
 - `results/` 中的运行结果表格和必要文本结果。
 - `figures/` 中的原始数据图、模型运行过程图、模型最终结果图；允许多生成候选图。
 - `results/复现清单.json`。
+- `results/result_registry.json`：所有将进入摘要、正文、表格和图片标注的重复数值，以稳定唯一键记录来源、单位、精度和生成命令。
 
 ## 执行顺序
 
@@ -36,7 +37,9 @@ description: 数学建模的 Python 或 MATLAB 实现、运行、表格输出、
 3. 写代码、运行、验证数值与边界条件；任何结论必须来自真实输出。
 4. 生成三类候选图，不使用网格线；统计标注必须由代码计算。
 5. 生成复现清单：`python scripts/repro_manifest.py --project-root <PROJECT_ROOT> ...`。
-6. 按 `references/质检清单.md` 验收。
+6. 对适用问题生成反例、极端边界、网格收敛、多随机种子、资源删除和候选指派结果；无法执行的检查记录理由，不得默认为通过。
+7. 生成 `results/result_registry.json`，禁止论文构建脚本再次手写已有结果数值。
+8. 按 `references/质检清单.md` 验收，再交给评审手。
 
 ## 何时加载
 
