@@ -2,9 +2,16 @@
 
 当前公开版本从 `1.0.0` 重新建立版本基线。根目录 `VERSION` 是当前版本的唯一准据。
 
+## 1.3.0 - 2026-07-23
+
+- 发布形式改为可直接作为工作目录打开的 Agent 套件，Skill 固定放在 `.agents/skills/math-modeling/`。
+- 增加根目录 `AGENTS.md` 与 `CLAUDE.md`，引导 Codex、Claude Code 和其他 Agent 自行发现 Skill、询问 Dify 配置并适配 stdio MCP。
+- Dify 发布配置改为通用地址和 `dataset_id: auto`，不再绑定某个账号或固定知识库 ID。
+- 保留 Codex 安装脚本作为兼容入口，但不再把全局 Codex 安装作为主工作流。
+
 ## 1.2.0 - 2026-07-22
 
-- 接入 `math_modeling_knowledge` MCP，统一并行检索六个文字知识库和一个多模态知识库。
+- 接入 `math_modeling_knowledge` MCP，统一并行检索八个文字知识库和一个多模态知识库。
 - 增加私有知识库的调用时机、查询约束、来源标注、证据优先级、噪声过滤和故障降级规则。
 - 支持把多模态命中的真实图片作为 MCP 图片内容块交给模型视觉理解，并明确禁止只凭文件名或说明推断图意。
 - 新增 `agents/openai.yaml` 元数据和 MCP 依赖声明，使该 Skill 可被 Codex 正确展示和按需触发。

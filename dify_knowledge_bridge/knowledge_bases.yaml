@@ -2,7 +2,7 @@ version: 1
 
 # Dify 知识库 Service API。密钥不要写在本文件，统一放到 .env。
 dify:
-  base_url: "https://dify.space4sgsa.com/v1"
+  base_url: "https://your-dify.example.com/v1"
   api_key_env: "DIFY_KNOWLEDGE_API_KEY"
   timeout_seconds: 60
   max_workers: 9
@@ -37,42 +37,42 @@ mcp:
 knowledge_bases:
   - key: "programming"
     dify_name: "数学建模-编程实现库"
-    dataset_id: "13240188-7190-4ee0-b4ea-f0ca59f1b245"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "代码实现、调试、数值计算与工程化"
 
   - key: "modeling_algorithms"
     dify_name: "数学建模-建模算法库"
-    dataset_id: "aec16c2e-6cfe-47a1-b5a3-3955706b74c0"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "数学模型、算法选择、假设与求解方法"
 
   - key: "competition_rules"
     dify_name: "数学建模-竞赛规则库"
-    dataset_id: "637d1213-6055-4d45-ad01-771f21afb22f"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "竞赛规则、格式规范与提交要求"
 
   - key: "domain_knowledge"
     dify_name: "数学建模-领域知识库"
-    dataset_id: "73128bc1-015e-4642-b1ed-8d6bd1eb3703"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "题目涉及的跨学科背景知识"
 
   - key: "paper_writing"
     dify_name: "数学建模-论文写作库"
-    dataset_id: "633a214d-a4f8-4e83-89ac-8840783332c7"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "论文结构、表达、图表与写作规范"
 
   - key: "excellent_cases"
     dify_name: "数学建模-优秀案例库"
-    dataset_id: "b0fc77bc-8e40-46be-9a31-9242c7cc1f42"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "优秀论文的建模思路、论证与实现案例"
@@ -81,7 +81,7 @@ knowledge_bases:
   # 若 Dify 中名称唯一，也可把 dataset_id 写成 auto 自动匹配。
   - key: "mistake_notebook"
     dify_name: "数学建模-错题本"
-    dataset_id: "5b33f409-78e0-4ab4-bd6f-e1ee6304bc94"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "练习复盘、错误根因、已验证修正、复用触发条件与防错检查"
@@ -90,14 +90,14 @@ knowledge_bases:
   # 本库沿用 defaults.retrieval，无需重复配置 retrieval。
   - key: "practice_reviews"
     dify_name: "数学建模-实践复盘库"
-    dataset_id: "34874b6f-0e6a-429b-befc-ec3375b268fe"
+    dataset_id: auto
     role: "text"
     enabled: true
     description: "有真实验证证据的推理摘要、完整建模决策链、成功经验与适用边界"
 
   - key: "multimodal_cases"
     dify_name: "数学建模-多模态库"
-    dataset_id: "31420477-b999-4df1-b36b-9b34bf5748cd"
+    dataset_id: auto
     role: "multimodal"
     enabled: true
     description: "只补充与问题相关的原图、图表及其上下文"

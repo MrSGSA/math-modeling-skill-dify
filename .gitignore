@@ -1,7 +1,7 @@
 # Dify credentials and local runtime
-dify-knowledge-bridge/.env
-dify-knowledge-bridge/.venv/
-dify-knowledge-bridge/last_result.json
+dify_knowledge_bridge/.env
+dify_knowledge_bridge/.venv/
+dify_knowledge_bridge/last_result.json
 
 # Python
 **/__pycache__/
