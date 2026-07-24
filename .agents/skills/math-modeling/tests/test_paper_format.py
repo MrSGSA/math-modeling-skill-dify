@@ -204,7 +204,7 @@ class PaperFormatTests(unittest.TestCase):
             min_figures=0,
             min_tables=0,
             rendered_pages=50,
-            rendered_body_pages=29,
+            rendered_body_pages=30,
             abstract_fill_ratio=0.90,
         )
 
