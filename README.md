@@ -9,7 +9,7 @@ math-modeling-skill-dify/
 ├─ AGENTS.md                       # 通用 Agent 工作区指令
 ├─ CLAUDE.md                       # Claude Code 入口
 ├─ .agents/skills/math-modeling/   # 完整数学建模 Skill
-└─ dify_knowledge_bridge/          # Dify 8 个文本库 + 1 个多模态库检索桥
+└─ dify_knowledge_bridge/          # Dify 8 个文本库 + 1 个多模态库检索与治理工具
 ```
 
 ## 最简单的使用方式

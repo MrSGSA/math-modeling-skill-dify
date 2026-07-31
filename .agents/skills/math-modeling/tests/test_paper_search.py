@@ -1,9 +1,10 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
-SCRIPTS = Path(__file__).resolve().parents[1] / "tools" / "paper_search" / "scripts"
+SCRIPTS = Path(__file__).resolve().parents[1] / "tools" / "paper-search" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from anysearch_academic import AnySearchAcademic
@@ -110,6 +111,21 @@ class FusionTests(unittest.TestCase):
         )
         self.assertEqual(total, 1)
 
+    def test_engine_failure_is_recorded_in_machine_readable_stats(self):
+        any_result = [{
+            "title": "Analytic hierarchy process decision support",
+            "authors": [], "year": 2024, "citations": 0,
+            "doi": "10.1000/ahp", "abstract": None,
+        }]
+        with patch.object(self.scholar.openalex, "search_papers", side_effect=RuntimeError("offline")), patch.object(
+            self.scholar.anysearch, "search_papers", return_value=any_result,
+        ):
+            result = self.scholar.search_papers("analytic hierarchy process", limit=3)
+        self.assertEqual(result["stats"]["source_status"]["openalex"], "failed")
+        self.assertEqual(result["stats"]["source_status"]["anysearch"], "ok")
+        self.assertTrue(result["stats"]["degraded"])
+        self.assertFalse(result["stats"]["dual_engine_cross_validation_complete"])
+
     def test_title_match_works_when_only_one_engine_has_doi(self):
         oa = [Paper("A Reliable Model", ["A"], 2022, 5, "10.1000/model", None)]
         anysearch = [{
@@ -126,28 +142,28 @@ class FusionTests(unittest.TestCase):
         self.assertEqual(result["cross_validated"][0].doi, "10.1000/model")
 
     def test_specialist_query_filters_topically_unrelated_high_citation_results(self):
-        self.scholar._current_query = "Sellmeier 4H-SiC Fabry-Perot"
+        self.scholar._current_query = "battery degradation Arrhenius state-space"
         oa = [
             Paper(
                 "Graphene electro-optic modulation",
                 ["A"], 2024, 5000, "10.1000/graphene", "Lithium niobate devices.",
             ),
             Paper(
-                "Sellmeier dispersion and Fabry-Perot interference in 4H-SiC",
-                ["B"], 2023, 10, "10.1000/sic", "Optical constants of silicon carbide.",
+                "Arrhenius degradation and state-space estimation in lithium-ion batteries",
+                ["B"], 2023, 10, "10.1000/battery", "Temperature-dependent battery aging.",
             ),
         ]
 
         result = self.scholar._fuse(oa, [], final_limit=5)
         selected = result["openalex_only"]
 
-        self.assertEqual([paper.doi for paper in selected], ["10.1000/sic"])
+        self.assertEqual([paper.doi for paper in selected], ["10.1000/battery"])
         self.assertEqual(result["stats"]["filtered_irrelevant"], 1)
 
     def test_specialist_query_keeps_partial_match_when_metadata_has_no_abstract(self):
-        self.scholar._current_query = "Sellmeier 4H-SiC Fabry-Perot"
+        self.scholar._current_query = "battery degradation Arrhenius state-space"
         anysearch = [{
-            "title": "Temperature dependence of the thermo-optic coefficient in 4H-SiC",
+            "title": "Temperature dependence of degradation rates in lithium-ion batteries",
             "authors": [],
             "year": 2022,
             "citations": 0,
@@ -160,15 +176,15 @@ class FusionTests(unittest.TestCase):
         self.assertEqual([paper.doi for paper in result["anysearch_only"]], ["10.1000/partial"])
 
     def test_same_engine_duplicate_titles_with_different_dois_are_collapsed(self):
-        self.scholar._current_query = "4H-SiC thermo-optic"
+        self.scholar._current_query = "battery degradation temperature"
         anysearch = [
             {
-                "title": "Temperature dependence of the thermo-optic coefficient in 4H-SiC",
+                "title": "Temperature dependence of degradation rates in lithium-ion batteries",
                 "authors": [], "year": 2022, "citations": 4,
                 "doi": "10.1000/final", "abstract": None,
             },
             {
-                "title": "Temperature Dependence of the Thermo Optic Coefficient in 4H SiC",
+                "title": "Temperature Dependence of Degradation Rates in Lithium Ion Batteries",
                 "authors": [], "year": 2021, "citations": 0,
                 "doi": "10.1000/preprint", "abstract": None,
             },

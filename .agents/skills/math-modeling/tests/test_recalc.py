@@ -16,6 +16,10 @@ import recalc
 
 
 class RecalcTests(unittest.TestCase):
+    def test_refuses_workbook_inside_skill_root(self):
+        result = recalc.recalc(recalc.SKILL_ROOT / "forbidden.xlsx")
+        self.assertIn("SKILL_ROOT", result["error"])
+
     def test_timeout_is_reported_as_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "book.xlsx"

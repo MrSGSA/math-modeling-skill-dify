@@ -15,6 +15,7 @@ from office.soffice import get_soffice_env
 
 
 logger = logging.getLogger(__name__)
+SKILL_ROOT = Path(__file__).resolve().parents[3]
 
 ACCEPT_CHANGES_MACRO = """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
@@ -69,13 +70,29 @@ def _setup_libreoffice_macro(profile: Path) -> bool:
         return False
 
 
-def accept_changes(input_file: str, output_file: str) -> tuple[None, str]:
+def _is_within(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def accept_changes(input_file: str, output_file: str, overwrite: bool = False) -> tuple[None, str]:
     source = Path(input_file).resolve()
     output = Path(output_file).resolve()
     if not source.is_file():
         return None, f"Error: 输入文件不存在: {source}"
     if source.suffix.lower() != ".docx":
         return None, f"Error: 输入文件不是 DOCX: {source}"
+    if output.suffix.lower() != ".docx":
+        return None, f"Error: 输出文件必须使用 .docx 扩展名: {output}"
+    if source == output:
+        return None, "Error: 输入与输出路径必须不同；本工具不原地覆盖原稿"
+    if _is_within(output, SKILL_ROOT):
+        return None, f"Error: 输出文件不能位于 SKILL_ROOT: {output}"
+    if output.exists() and not overwrite:
+        return None, f"Error: 输出已存在；如确认覆盖请显式使用 --overwrite: {output}"
 
     try:
         with tempfile.TemporaryDirectory(prefix="math-modeling-docx-") as temp_dir:
@@ -125,8 +142,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="接受 DOCX 中的全部修订")
     parser.add_argument("input_file")
     parser.add_argument("output_file")
+    parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
-    _, message = accept_changes(args.input_file, args.output_file)
+    _, message = accept_changes(args.input_file, args.output_file, overwrite=args.overwrite)
     print(message)
     if message.startswith("Error:"):
         raise SystemExit(1)

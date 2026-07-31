@@ -12,6 +12,11 @@ import lxml.etree
 
 from .base import BaseSchemaValidator
 
+try:
+    from helpers.safe_zip import safe_extract_zip
+except ModuleNotFoundError:  # 作为 office.validators 包导入时
+    from ..helpers.safe_zip import safe_extract_zip
+
 
 class DOCXSchemaValidator(BaseSchemaValidator):
 
@@ -186,7 +191,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
         try:
             with tempfile.TemporaryDirectory() as temp_dir:
                 with zipfile.ZipFile(original, "r") as zip_ref:
-                    zip_ref.extractall(temp_dir)
+                    safe_extract_zip(zip_ref, temp_dir)
 
                 doc_xml_path = temp_dir + "/word/document.xml"
                 root = lxml.etree.parse(doc_xml_path).getroot()
@@ -258,34 +263,46 @@ class DOCXSchemaValidator(BaseSchemaValidator):
 
         for xml_file in self.xml_files:
             try:
-                for elem in lxml.etree.parse(str(xml_file)).iter():
-                    if val := elem.get(para_id_attr):
-                        if self._parse_id_value(val, base=16) >= 0x80000000:
+                elements = lxml.etree.parse(str(xml_file)).iter()
+                for elem in elements:
+                    if para_id_attr in elem.attrib:
+                        val = elem.get(para_id_attr, "")
+                        try:
+                            parsed = self._parse_id_value(val, base=16)
+                        except (TypeError, ValueError):
                             errors.append(
-                                f"  {xml_file.name}:{elem.sourceline}: paraId={val} >= 0x80000000"
+                                f"  {xml_file.name}:{elem.sourceline}: "
+                                f"paraId={val!r} must be hexadecimal"
                             )
-
-                    if val := elem.get(durable_id_attr):
-                        if xml_file.name == "numbering.xml":
-                            try:
-                                if self._parse_id_value(val, base=10) >= 0x7FFFFFFF:
-                                    errors.append(
-                                        f"  {xml_file.name}:{elem.sourceline}: "
-                                        f"durableId={val} >= 0x7FFFFFFF"
-                                    )
-                            except ValueError:
+                        else:
+                            if parsed >= 0x80000000:
                                 errors.append(
                                     f"  {xml_file.name}:{elem.sourceline}: "
-                                    f"durableId={val} must be decimal in numbering.xml"
+                                    f"paraId={val} >= 0x80000000"
                                 )
+
+                    if durable_id_attr in elem.attrib:
+                        val = elem.get(durable_id_attr, "")
+                        base = 10 if xml_file.name == "numbering.xml" else 16
+                        notation = "decimal" if base == 10 else "hexadecimal"
+                        try:
+                            parsed = self._parse_id_value(val, base=base)
+                        except (TypeError, ValueError):
+                            errors.append(
+                                f"  {xml_file.name}:{elem.sourceline}: "
+                                f"durableId={val!r} must be {notation}"
+                            )
                         else:
-                            if self._parse_id_value(val, base=16) >= 0x7FFFFFFF:
+                            if parsed >= 0x7FFFFFFF:
                                 errors.append(
                                     f"  {xml_file.name}:{elem.sourceline}: "
                                     f"durableId={val} >= 0x7FFFFFFF"
                                 )
-            except Exception:
-                pass
+            except (OSError, lxml.etree.XMLSyntaxError) as exc:
+                errors.append(
+                    f"  {xml_file.relative_to(self.unpacked_dir)}: "
+                    f"unable to validate ID constraints: {exc}"
+                )
 
         if errors:
             print(f"FAILED - {len(errors)} ID constraint violations:")

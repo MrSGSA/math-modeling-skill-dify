@@ -674,14 +674,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     if IS_INSTALLED_SKILL and (output == SKILL_ROOT or SKILL_ROOT in output.parents):
         print("输出目录不能位于 SKILL_ROOT 内。", file=sys.stderr)
         return 3
-    if output == source:
-        print("输入目录和输出目录不能相同。", file=sys.stderr)
+    def overlaps(first: Path, second: Path) -> bool:
+        return first == second or first in second.parents or second in first.parents
+
+    if overlaps(output, source):
+        print("输入目录和多模态输出目录不能相同或互相嵌套。", file=sys.stderr)
         return 3
     if markdown_output and not args.dify_multimodal:
         print("--markdown-output 只能与 --dify-multimodal 一起使用。", file=sys.stderr)
         return 3
-    if markdown_output and markdown_output in {source, output}:
-        print("Markdown 输出目录必须与输入目录和多模态输出目录不同。", file=sys.stderr)
+    if markdown_output and (
+        overlaps(markdown_output, source) or overlaps(markdown_output, output)
+    ):
+        print("Markdown 输出目录必须与输入目录和多模态输出目录分离且不互相嵌套。", file=sys.stderr)
         return 3
     if (
         markdown_output

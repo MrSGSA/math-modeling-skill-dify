@@ -1,0 +1,7 @@
+interface:
+  display_name: "建模手"
+  short_description: "系统拆解赛题、设计最少充分模型、参数合同与可证伪验证方案"
+  default_prompt: "使用 $model-designer 完成题目理解、模型设计、参数合同与验证规划。"
+
+policy:
+  allow_implicit_invocation: true

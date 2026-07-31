@@ -12,9 +12,11 @@ accurate field coordinates for filling.
 Usage: python extract_form_structure.py <input.pdf> <output.json>
 """
 
+import argparse
 import json
 import sys
 import pdfplumber
+from safe_paths import atomic_write_text, input_file, output_file
 
 
 def extract_form_structure(pdf_path):
@@ -88,28 +90,49 @@ def extract_form_structure(pdf_path):
     return structure
 
 
-def main():
-    if len(sys.argv) != 3:
-        print("Usage: extract_form_structure.py <input.pdf> <output.json>")
-        sys.exit(1)
-
-    pdf_path = sys.argv[1]
-    output_path = sys.argv[2]
+def write_form_structure(pdf_path, output_path, overwrite=False):
+    pdf_path = input_file(pdf_path)
+    output_path = output_file(
+        output_path,
+        inputs=[pdf_path],
+        overwrite=overwrite,
+        suffixes={".json"},
+    )
 
     print(f"Extracting structure from {pdf_path}...")
     structure = extract_form_structure(pdf_path)
+    atomic_write_text(
+        output_path,
+        json.dumps(structure, ensure_ascii=False, indent=2),
+    )
 
-    with open(output_path, "w") as f:
-        json.dump(structure, f, indent=2)
-
-    print(f"Found:")
+    print("Found:")
     print(f"  - {len(structure['pages'])} pages")
     print(f"  - {len(structure['labels'])} text labels")
     print(f"  - {len(structure['lines'])} horizontal lines")
     print(f"  - {len(structure['checkboxes'])} checkboxes")
     print(f"  - {len(structure['row_boundaries'])} row boundaries")
     print(f"Saved to {output_path}")
+    return structure
+
+
+def main():
+    parser = argparse.ArgumentParser(description="提取不可编辑 PDF 的版面结构")
+    parser.add_argument("input_pdf")
+    parser.add_argument("output_json")
+    parser.add_argument("--overwrite", action="store_true")
+    args = parser.parse_args()
+    try:
+        write_form_structure(
+            args.input_pdf,
+            args.output_json,
+            overwrite=args.overwrite,
+        )
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

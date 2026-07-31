@@ -7,10 +7,15 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+try:
+    from helpers.safe_zip import safe_extract_zip
+except ModuleNotFoundError:  # 作为 office.validators 包导入时
+    from ..helpers.safe_zip import safe_extract_zip
+
 
 class RedliningValidator:
 
-    def __init__(self, unpacked_dir, original_docx, verbose=False, author="Claude"):
+    def __init__(self, unpacked_dir, original_docx, verbose=False, author="Reviewer"):
         self.unpacked_dir = Path(unpacked_dir)
         self.original_docx = Path(original_docx)
         self.verbose = verbose
@@ -61,7 +66,7 @@ class RedliningValidator:
 
             try:
                 with zipfile.ZipFile(self.original_docx, "r") as zip_ref:
-                    zip_ref.extractall(temp_path)
+                    safe_extract_zip(zip_ref, temp_path)
             except Exception as e:
                 print(f"FAILED - Error unpacking original docx: {e}")
                 return False

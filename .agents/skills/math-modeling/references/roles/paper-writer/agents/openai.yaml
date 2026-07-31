@@ -1,0 +1,7 @@
+interface:
+  display_name: "论文手"
+  short_description: "依据真实结果和当届官方模板生成论文，并通过发布门禁完成交付"
+  default_prompt: "使用 $paper-writer 根据已通过红队的真实结果和当届官方规则生成并发布论文。"
+
+policy:
+  allow_implicit_invocation: true

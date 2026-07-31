@@ -1,0 +1,7 @@
+interface:
+  display_name: "文档批量入库"
+  short_description: "批量转换 PDF 与 Office 文档为知识库 Markdown 和多模态图片包"
+  default_prompt: "使用 $pdf-batch 将文档批量转换为可追溯 Markdown 和多模态图片检索包。"
+
+policy:
+  allow_implicit_invocation: true

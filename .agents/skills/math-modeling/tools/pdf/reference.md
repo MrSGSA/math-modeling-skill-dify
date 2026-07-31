@@ -2,6 +2,19 @@
 
 This document contains advanced PDF processing features, detailed examples, and additional libraries not covered in the main skill instructions.
 
+Access control from `SKILL.md` applies to every example here: decrypt only when the user is authorized to access the PDF and has supplied the legitimate password. Never guess, crack, bypass, log, or persist passwords in generated artifacts.
+
+## Contents
+
+- pypdfium2 library
+- JavaScript libraries
+- Advanced command-line operations
+- Advanced Python techniques
+- Complex workflows
+- Performance optimization
+- Troubleshooting
+- License information
+
 ## pypdfium2 Library (Apache/BSD License)
 
 ### Overview
@@ -336,8 +349,8 @@ qpdf --encrypt user_pass owner_pass 256 --print=none --modify=none -- input.pdf 
 # Check encryption status
 qpdf --show-encryption encrypted.pdf
 
-# Remove password protection (requires password)
-qpdf --password=secret123 --decrypt encrypted.pdf decrypted.pdf
+# Decryption intentionally has no inline-password command here.
+# Use the authorized runtime getpass example in SKILL.md instead.
 ```
 
 ## Advanced Python Techniques
@@ -548,7 +561,14 @@ with open("cropped.pdf", "wb") as output:
 ### 5. Memory Management
 ```python
 # Process PDFs in chunks
-def process_large_pdf(pdf_path, chunk_size=10):
+from pathlib import Path
+from pypdf import PdfReader, PdfWriter
+
+def process_large_pdf(pdf_path, output_dir, chunk_size=10):
+    if not isinstance(chunk_size, int) or isinstance(chunk_size, bool) or chunk_size < 1:
+        raise ValueError("chunk_size must be a positive integer")
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     reader = PdfReader(pdf_path)
     total_pages = len(reader.pages)
     
@@ -560,7 +580,10 @@ def process_large_pdf(pdf_path, chunk_size=10):
             writer.add_page(reader.pages[i])
         
         # Process chunk
-        with open(f"chunk_{start_idx//chunk_size}.pdf", "wb") as output:
+        output_path = output_dir / f"chunk_{start_idx//chunk_size}.pdf"
+        if output_path.exists():
+            raise FileExistsError(f"refusing to overwrite {output_path}")
+        with output_path.open("xb") as output:
             writer.write(output)
 ```
 
@@ -568,22 +591,25 @@ def process_large_pdf(pdf_path, chunk_size=10):
 
 ### Encrypted PDFs
 ```python
-# Handle password-protected PDFs
+# Handle password-protected PDFs only with user authorization and a supplied password.
+from getpass import getpass
 from pypdf import PdfReader
 
 try:
     reader = PdfReader("encrypted.pdf")
     if reader.is_encrypted:
-        reader.decrypt("password")
+        if reader.decrypt(getpass("PDF password: ")) == 0:
+            raise ValueError("Invalid password; do not guess or bypass access control")
 except Exception as e:
     print(f"Failed to decrypt: {e}")
 ```
 
 ### Corrupted PDFs
 ```bash
-# Use qpdf to repair
+# Write a repaired copy; do not replace the only source file in place.
 qpdf --check corrupted.pdf
-qpdf --replace-input corrupted.pdf
+qpdf corrupted.pdf repaired.pdf
+qpdf --check repaired.pdf
 ```
 
 ### Text Extraction Issues

@@ -1,7 +1,7 @@
 interface:
   display_name: "数学建模工作流"
-  short_description: "四角色建模、红队评审、论文交付与九库多模态检索工作流"
-  default_prompt: "使用 $math-modeling 完成题目分析、代码求解、红队评审和论文交付，并优先检索已接入的数学建模知识库。"
+  short_description: "四阶段建模、红队评审、论文交付与九库多模态检索工作流"
+  default_prompt: "使用 $math-modeling 完成题目分析、代码求解、红队评审和论文交付，并在任务确有需要且知识库可用时按需检索。"
 
 dependencies:
   tools:

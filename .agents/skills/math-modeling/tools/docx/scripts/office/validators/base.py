@@ -8,6 +8,11 @@ from pathlib import Path
 import defusedxml.minidom
 import lxml.etree
 
+try:
+    from helpers.safe_zip import safe_extract_zip
+except ModuleNotFoundError:  # 作为 office.validators 包导入时
+    from ..helpers.safe_zip import safe_extract_zip
+
 
 class BaseSchemaValidator:
 
@@ -688,7 +693,8 @@ class BaseSchemaValidator:
 
         original_errors = self._get_original_file_errors(xml_file)
 
-        assert current_errors is not None
+        if current_errors is None:
+            raise RuntimeError("XSD validation returned failure without an error set")
         new_errors = current_errors - original_errors
 
         new_errors = {
@@ -880,7 +886,7 @@ class BaseSchemaValidator:
             temp_path = Path(temp_dir)
 
             with zipfile.ZipFile(self.original_file, "r") as zip_ref:
-                zip_ref.extractall(temp_path)
+                safe_extract_zip(zip_ref, temp_path)
 
             original_xml_file = temp_path / relative_path
 

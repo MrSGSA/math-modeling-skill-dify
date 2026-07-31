@@ -13,20 +13,20 @@ from read_rows import read_excel_rows
 
 
 class ExcelReadTests(unittest.TestCase):
-    def test_headerless_sheet_keeps_first_value_and_all_7470_rows(self):
+    def test_headerless_sheet_keeps_first_value_and_all_expected_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "spectrum.xlsx"
             workbook = Workbook()
             sheet = workbook.active
-            sheet.cell(1, 1, 399.6747)
-            for row in range(2, 7471):
+            sheet.cell(1, 1, 12.5)
+            for row in range(2, 8):
                 sheet.cell(row, 1, float(row))
             workbook.save(path)
 
-            rows = read_excel_rows(path, header=False, expected_rows=7470)
+            rows = read_excel_rows(path, header=False, expected_rows=7)
 
-        self.assertEqual(len(rows), 7470)
-        self.assertEqual(rows[0][0], 399.6747)
+        self.assertEqual(len(rows), 7)
+        self.assertEqual(rows[0][0], 12.5)
 
     def test_expected_row_count_mismatch_fails_loudly(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,9 +1,11 @@
 ---
-name: DOCX工具
+name: docx
 description: 创建、编辑、校验和转换 Word DOCX，支持数学建模论文模板、原生公式、三线表、修订和批注。
 ---
 
 # DOCX 工具
+
+许可：专有；完整条款见 `LICENSE.txt`。
 
 ## 路径与写入
 
@@ -37,7 +39,7 @@ pf.body(doc, "摘要正文。")
 pf.keywords(doc, "优化；预测")
 pf.equation(doc, r"\min f(x)=\sum_{i=1}^{n}x_i^2")
 pf.three_line_table(doc, [["符号", "说明"], ["x", "决策变量"]])
-pf.save_document(doc, Path("<PROJECT_ROOT>"), contest="cumcm")
+pf.save_document(doc, Path("<PROJECT_ROOT>"), filename="论文候选稿.docx", contest="cumcm")
 ```
 
 ## 公式
@@ -90,6 +92,8 @@ python scripts/accept_changes.py "输入.docx" "<PROJECT_ROOT>/已接受修订.d
 
 先解包，再添加批注元数据和文档标记。父批注不存在或批注 ID 重复时，工具会在写入前失败。
 
+默认批注与修订作者使用中性值 `Reviewer`。如需写入真实作者名，必须由用户明确指定；不得默认写入模型或厂商名称。不自动添加、删除或推断 AI 使用披露；是否披露及披露内容由用户依据目标任务的官方规则决定，规则强制要求时必须遵守。
+
 ```powershell
 python scripts/comment.py "<PROJECT_ROOT>/unpacked" 0 "批注意见"
 python scripts/comment.py "<PROJECT_ROOT>/unpacked" 1 "回复意见" --parent 0
@@ -100,7 +104,23 @@ python scripts/comment.py "<PROJECT_ROOT>/unpacked" 1 "回复意见" --parent 0
 ```powershell
 python scripts/check_env.py
 python scripts/self_check.py
-python scripts/office/validate.py "<PROJECT_ROOT>/完整论文.docx"
+python scripts/office/validate.py "<PROJECT_ROOT>/论文候选稿.docx"
 ```
 
-调用 `validate_paper_structure()` 检查官方前置结构、摘要页渲染填充率、正文篇幅质量目标、公式/图/表数量、图表编号与正文引用、参考文献双向对应，并分别传入PDF总页数、正文页数、摘要有效区域填充率和电子文件大小。CUMCM默认以摘要充实且不溢出一页、正文恰好30页为优选质量目标；以2026年官方规范为例，正文不超过30页、电子论文不超过20MB才是硬约束，附录和PDF总页数不限。一级标题默认连续排版，不得逐章强制分页制造空白。结构校验后，把DOCX渲染成PDF或图片抽检分页、公式、表格、图片、页眉页脚和字体替换。
+调用 `validate_paper_structure()` 时，显式传入目标竞赛当届规则和项目质量目标。校验可覆盖官方前置结构、摘要语义与可选版面区间、正文篇幅、公式/图/表、图表编号与正文引用、参考文献双向对应、渲染页数和电子文件大小；未配置的数量或篇幅目标不应被工具猜测为硬门槛。官方模板中的徽标、摘要布局表等非论文图表须在发布清单中用 `excluded_figure_objects`、`excluded_table_objects` 明确计数，不能让工具把装饰对象误判为论文证据。内置参考文献双向解析针对数字编号制；若官方要求作者—年份等格式，将 `check_numeric_reference_bijection` 设为 `false`，并以单独的机器可读引用核对结果作为红队证据。结构校验后，把 DOCX 用发布清单指定的渲染器转换为 PDF 或图片，抽检分页、公式、表格、图片、页眉页脚和字体替换。
+
+最终发布必须额外运行：
+
+```powershell
+python scripts/paper_release_gate.py `
+  --manifest "<PROJECT_ROOT>/results/paper_release_manifest.json" `
+  --candidate "<PROJECT_ROOT>/论文候选稿.docx" `
+  --rendered-pdf "<PROJECT_ROOT>/rendered/论文候选稿.pdf" `
+  --output "<PROJECT_ROOT>/完整论文.docx"
+```
+
+若 `official_rules.submission_format` 为 `pdf` 或 `both`，再传入 `--submission-pdf-output "<PROJECT_ROOT>/完整论文.pdf"`；门禁会从已经锁定的渲染 PDF 发布该文件，不能另行转换一份未核验 PDF。
+
+先把 2.1 版 `references/paper_release_manifest.example.json` 复制到 `PROJECT_ROOT/results/paper_release_manifest.json`，再按当前竞赛、题目子问题和实际文件逐项替换。示例中的两个子问题仅演示动态数组结构，必须增删为当前题的真实数量；每个摘要必答项须写明 `requirement` 并登记互不冒充的摘要原文证据，禁止保留占位文本。空的 `quality_target` 表示没有另设非官方数量或篇幅门槛。
+
+发布清单必须记录竞赛与届次、官方规则来源与核验日期、模板路径与 SHA-256、分页结构、适用的硬约束和质量目标、动态摘要必答项、渲染器，以及候选稿、渲染 PDF、结果注册表和红队审计的 SHA-256。备用模板未经用户明确批准、锁定文件被修改、红队未通过、摘要必答项缺失或任何阻断级检查失败时，门禁返回失败且不得交付。没有来源的页数、字数、填充率、公式/图/表数量不得作为通用默认门槛。

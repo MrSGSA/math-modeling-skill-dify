@@ -1,0 +1,84 @@
+{
+  "schema_version": "2.1",
+  "project_root": "..",
+  "competition": "目标竞赛全称",
+  "edition": "目标届次",
+  "contest_profile": "custom",
+  "official_rules": {
+    "source": "当届官方规则 URL 或项目内文件",
+    "verified_date": "YYYY-MM-DD",
+    "submission_format": "docx",
+    "hard_constraints": {}
+  },
+  "template": {
+    "authority": "official",
+    "path": "当届官方模板.docx",
+    "sha256": "替换为64位SHA-256",
+    "user_approved_fallback": false,
+    "approval_evidence": "仅在 authority=fallback 时记录用户原话或对话定位"
+  },
+  "renderer": {
+    "name": "实际使用的渲染器",
+    "version": "渲染器版本"
+  },
+  "layout": {
+    "abstract_page": 1,
+    "abstract_heading_pattern": "^\\s*摘\\s*要\\s*[:：]?\\s*$",
+    "abstract_end_pattern": "^\\s*关键词\\s*[:：]",
+    "abstract_end_required": true,
+    "body_start_page": 2,
+    "body_end_page": null,
+    "appendix_required": false,
+    "appendix_heading_pattern": "^\\s*(?:附录|Appendix)(?:\\s|[A-ZＡ-Ｚ一二三四五六七八九十0-9]|$)"
+  },
+  "structure": {
+    "required_markers": ["摘 要", "关键词："],
+    "figure_labels": ["图"],
+    "table_labels": ["表"],
+    "reference_headings": ["参考文献"],
+    "require_reference_section": true,
+    "excluded_figure_objects": 0,
+    "excluded_table_objects": 0,
+    "check_figure_numbering": true,
+    "check_table_numbering": true,
+    "check_numeric_reference_bijection": true
+  },
+  "quality_target": {},
+  "abstract_audit": {
+    "required_items": [
+      "problem_scope",
+      "problem_1_method_result",
+      "problem_2_method_result",
+      "quantitative_results",
+      "validation",
+      "applicability_boundary"
+    ],
+    "items": {
+      "problem_scope": {"requirement": "概括当前题目的研究对象、任务范围和目标", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]},
+      "problem_1_method_result": {"requirement": "写明问题一的方法和直接回答题目的结果", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]},
+      "problem_2_method_result": {"requirement": "写明问题二的方法和直接回答题目的结果", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]},
+      "quantitative_results": {"requirement": "给出支撑核心结论的关键定量结果及单位", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]},
+      "validation": {"requirement": "说明与核心结论相匹配的验证或稳健性证据", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]},
+      "applicability_boundary": {"requirement": "说明会影响结论使用的主要边界或前提", "status": "pass", "evidence": ["替换为该要求对应的完整摘要原文片段"]}
+    }
+  },
+  "artifacts": {
+    "candidate": {
+      "path": "论文候选稿.docx",
+      "sha256": "替换为64位SHA-256"
+    },
+    "rendered_pdf": {
+      "path": "rendered/论文候选稿.pdf",
+      "sha256": "替换为64位SHA-256",
+      "source_candidate_sha256": "与candidate.sha256完全相同"
+    },
+    "result_registry": {
+      "path": "results/result_registry.json",
+      "sha256": "替换为64位SHA-256"
+    },
+    "red_team_audit": {
+      "path": "results/red_team_audit.json",
+      "sha256": "替换为64位SHA-256"
+    }
+  }
+}

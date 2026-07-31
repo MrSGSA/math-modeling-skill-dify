@@ -63,3 +63,13 @@ python3 -m venv .venv
 阅读 `MCP_SETUP.md`。Agent 应先检测当前客户端的 MCP 命令与配置格式，再把本目录的 `.venv` Python 和 `mcp_server.py` 注册为 `math_modeling_knowledge`。
 
 `install_or_repair_codex_mcp.ps1` 与中文 CMD 入口仅作为 Windows + Codex 的兼容辅助，不是本套件的主入口。
+
+## 元数据治理
+
+`metadata_governance.py` 可为九库文档生成统一元数据、重复内容指纹和治理预览。默认只读远端并把预览写入仓库外层的 `knowledge_governance/`：
+
+```powershell
+.\.venv\Scripts\python .\metadata_governance.py
+```
+
+仅在检查预览后，才使用 `--apply` 创建字段并批量写回 Dify。可用 `--dataset <key>` 限定单个知识库；脚本会先写入一条记录作为金丝雀并回读校验，再继续批量处理。

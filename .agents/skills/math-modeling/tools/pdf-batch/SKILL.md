@@ -7,6 +7,8 @@ description: 批量把含正文、表格、数学公式和图片的 PDF、DOCX�
 
 调用 scripts/batch_convert.py 和 MinerU。保持输入文档只读，将结果写入 PROJECT_ROOT。旧式 `.doc` 先转换为 `.docx`。
 
+输入目录、Markdown 输出目录和多模态包输出目录必须彼此分离，既不能相同也不能互相嵌套；否则递归发现可能把上次产物再次当作输入，工具会拒绝运行。
+
 ## 环境与运行
 
 MinerU 在 Windows 上要求 Python 3.10 至 3.12。本机默认 Python 可以用于启动批处理，但 MinerU 应使用 uv 建立的独立 Python 3.12 工具环境：

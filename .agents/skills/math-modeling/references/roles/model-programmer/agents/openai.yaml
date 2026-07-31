@@ -1,0 +1,7 @@
+interface:
+  display_name: "编程手"
+  short_description: "实现并真实运行数学模型，生成可复现结果、诊断图与结果注册表"
+  default_prompt: "使用 $model-programmer 实现并运行模型，生成可复现结果、证据图和结果注册表。"
+
+policy:
+  allow_implicit_invocation: true

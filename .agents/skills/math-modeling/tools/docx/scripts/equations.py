@@ -29,8 +29,6 @@ import json
 import re
 import subprocess
 import sys
-import tempfile
-from pathlib import Path
 from xml.etree import ElementTree as ET
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -40,7 +38,7 @@ if hasattr(sys.stdout, "reconfigure"):
 try:
     from docx import Document
     from docx.oxml import OxmlElement
-    from docx.oxml.ns import nsmap, qn
+    from docx.oxml.ns import qn
     from lxml import etree
 except ImportError:
     print("错误: 请先安装依赖: pip install python-docx lxml", file=sys.stderr)

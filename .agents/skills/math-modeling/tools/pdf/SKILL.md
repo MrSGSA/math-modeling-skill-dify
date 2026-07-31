@@ -1,14 +1,25 @@
 ---
 name: pdf
-description: Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.
-license: Proprietary. LICENSE.txt has complete terms
+description: 读取、提取、创建和修改 PDF，支持文本/表格/图片提取、合并、拆分、旋转、水印、表单、加密解密与 OCR。用户提到 PDF 文件或要求生成 PDF 时使用。
 ---
 
-# PDF Processing Guide
+# PDF 工具
+
+许可：专有；完整条款见 `LICENSE.txt`。
+
+## Path safety
+
+- Treat source PDFs as read-only and write new files under the user project directory.
+- Do not overwrite an input file unless the user explicitly requests it and a recoverable copy exists.
+- Resolve merge, split, OCR, form, watermark, encryption, and extraction targets before writing; never use the Skill directory as an output location.
+- After any structural change, reopen the output, verify page count and key content, and visually inspect affected pages when layout matters.
+- Relative filenames in the examples are placeholders under `PROJECT_ROOT`. Run from the project directory or replace them with resolved project paths; never run an example from the Skill directory when it can create output.
+- 只有在用户有权访问该 PDF 且主动提供合法密码时才执行解密；不得猜测、破解、绕过或削弱访问控制。密码不得写入日志、文档元数据或默认命令历史。
+- 不自动添加、删除或推断 AI 使用披露，也不把模型或厂商名写入默认作者、创建者或文档元数据；是否披露由用户依据适用规则决定。
 
 ## Overview
 
-This guide covers essential PDF processing operations using Python libraries and command-line tools. For advanced features, JavaScript libraries, and detailed examples, see REFERENCE.md. If you need to fill out a PDF form, read FORMS.md and follow its instructions.
+This guide covers essential PDF processing operations using Python libraries and command-line tools. For advanced features, JavaScript libraries, and detailed examples, see `reference.md`. If you need to fill out a PDF form, read `forms.md` and follow its instructions.
 
 ## Quick Start
 
@@ -45,6 +56,8 @@ with open("merged.pdf", "wb") as output:
 
 #### Split PDF
 ```python
+from pypdf import PdfReader, PdfWriter
+
 reader = PdfReader("input.pdf")
 for i, page in enumerate(reader.pages):
     writer = PdfWriter()
@@ -55,6 +68,8 @@ for i, page in enumerate(reader.pages):
 
 #### Extract Metadata
 ```python
+from pypdf import PdfReader
+
 reader = PdfReader("document.pdf")
 meta = reader.metadata
 print(f"Title: {meta.title}")
@@ -65,6 +80,8 @@ print(f"Creator: {meta.creator}")
 
 #### Rotate Pages
 ```python
+from pypdf import PdfReader, PdfWriter
+
 reader = PdfReader("input.pdf")
 writer = PdfWriter()
 
@@ -90,6 +107,8 @@ with pdfplumber.open("document.pdf") as pdf:
 
 #### Extract Tables
 ```python
+import pdfplumber
+
 with pdfplumber.open("document.pdf") as pdf:
     for i, page in enumerate(pdf.pages):
         tables = page.extract_tables()
@@ -102,6 +121,7 @@ with pdfplumber.open("document.pdf") as pdf:
 #### Advanced Table Extraction
 ```python
 import pandas as pd
+import pdfplumber
 
 with pdfplumber.open("document.pdf") as pdf:
     all_tables = []
@@ -212,8 +232,27 @@ qpdf input.pdf --pages . 6-10 -- pages6-10.pdf
 # Rotate pages
 qpdf input.pdf output.pdf --rotate=+90:1  # Rotate page 1 by 90 degrees
 
-# Remove password
-qpdf --password=mypassword --decrypt encrypted.pdf decrypted.pdf
+# 解密时不要把密码直接写在命令行；使用下方运行时安全输入示例。
+```
+
+#### 经授权解密
+
+```python
+from getpass import getpass
+from pypdf import PdfReader, PdfWriter
+
+reader = PdfReader("encrypted.pdf")
+if not reader.is_encrypted:
+    raise ValueError("输入 PDF 未加密，无需解密")
+password = getpass("PDF password: ")  # 用户有权访问并在运行时主动输入
+if reader.decrypt(password) == 0:
+    raise ValueError("密码无效；不得继续猜测或绕过访问控制")
+writer = PdfWriter()
+for page in reader.pages:
+    writer.add_page(page)
+with open("decrypted.pdf", "wb") as output:
+    writer.write(output)
+del password
 ```
 
 ### pdftk (if available)
@@ -304,11 +343,11 @@ with open("encrypted.pdf", "wb") as output:
 | Create PDFs | reportlab | Canvas or Platypus |
 | Command line merge | qpdf | `qpdf --empty --pages ...` |
 | OCR scanned PDFs | pytesseract | Convert to image first |
-| Fill PDF forms | pdf-lib or pypdf (see FORMS.md) | See FORMS.md |
+| Fill PDF forms | pdf-lib or pypdf (see `forms.md`) | See `forms.md` |
 
 ## Next Steps
 
-- For advanced pypdfium2 usage, see REFERENCE.md
-- For JavaScript libraries (pdf-lib), see REFERENCE.md
-- If you need to fill out a PDF form, follow the instructions in FORMS.md
-- For troubleshooting guides, see REFERENCE.md
+- For advanced pypdfium2 usage, see `reference.md`
+- For JavaScript libraries (pdf-lib), see `reference.md`
+- If you need to fill out a PDF form, follow the instructions in `forms.md`
+- For troubleshooting guides, see `reference.md`

@@ -1,0 +1,7 @@
+interface:
+  display_name: "评审手"
+  short_description: "独立红队审计数据、模型、代码、验证证据、参数语义与主张强度"
+  default_prompt: "使用 $model-reviewer 独立审计数据、模型、实现、验证证据和论文主张。"
+
+policy:
+  allow_implicit_invocation: true

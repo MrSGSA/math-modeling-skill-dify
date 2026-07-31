@@ -1,9 +1,11 @@
 ---
-name: Excel工具
+name: xlsx
 description: 读取、创建、修改和验证 XLSX，支持模板保留、公式重算和错误检查。
 ---
 
 # Excel 工具
+
+许可：专有；完整条款见 `LICENSE.txt`。
 
 ## 原则
 
@@ -19,9 +21,19 @@ import pandas as pd
 
 # 第一行就是数据时必须显式使用 header=None。
 data = pd.read_excel("data/input.xlsx", sheet_name=0, header=None)
-assert len(data) == 7470, f"行数异常: {len(data)}"
-result = pd.DataFrame({"方案": names, "目标值": values})
-result.to_excel("results/结果.xlsx", index=False)
+# 从题目数据合同、附件说明或独立原始计数填写；未知时保留 None 并先完成核验。
+expected_rows = None
+if expected_rows is None:
+    raise ValueError("请先从当前题目建立 expected_rows，不能沿用其他题数值")
+if len(data) != expected_rows:
+    raise ValueError(f"行数异常: 实际 {len(data)}，预期 {expected_rows}")
+
+def write_result_table(names, values, output_path):
+    """names/values 必须来自真实运行结果，output_path 必须位于 PROJECT_ROOT。"""
+    if len(names) != len(values):
+        raise ValueError("方案名与目标值数量不一致")
+    result = pd.DataFrame({"方案": names, "目标值": values})
+    result.to_excel(output_path, index=False)
 ```
 
 禁止依赖 `pandas.read_excel()` 默认的 `header=0` 猜测表头，否则第一行数据会被当成列名。未知表头结构或必须精确保留行时使用无隐式推断的读取工具：
@@ -29,12 +41,21 @@ result.to_excel("results/结果.xlsx", index=False)
 ```python
 from scripts.read_rows import read_excel_rows
 
+expected_rows = None  # 从当前题目合同填写
+if expected_rows is None:
+    raise ValueError("请先建立当前题目的预期行数")
 rows = read_excel_rows(
     "data/input.xlsx",
     header=False,
-    expected_rows=7470,
+    expected_rows=expected_rows,
 )
-assert rows[0][0] == 399.6747
+# 与原始附件独立抽取的首末行哨兵核对，不能在 Skill 中硬编码某道题的数值。
+expected_first_row = None
+expected_last_row = None
+if expected_first_row is None or expected_last_row is None:
+    raise ValueError("请先记录当前附件的首末行哨兵")
+if rows[0] != expected_first_row or rows[-1] != expected_last_row:
+    raise ValueError("首行或末行哨兵与原始附件不一致")
 ```
 
 读取后必须核对首行、末行、原始工作表有效行数和题目声明的记录数；行数不符时立即报错，不得静默继续建模。

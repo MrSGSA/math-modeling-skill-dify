@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-SCRIPTS = Path(__file__).resolve().parents[1] / "references" / "roles" / "编程手" / "scripts"
+SCRIPTS = Path(__file__).resolve().parents[1] / "references" / "roles" / "model-programmer" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import check_env
@@ -40,12 +40,14 @@ class ReproManifestTests(unittest.TestCase):
                 parameters={"alpha": 0.1},
                 command="python 问题1_求解.py --seed 42",
                 packages=[],
+                project_root=root,
             )
 
         self.assertEqual(manifest["random_seed"], 42)
         self.assertEqual(manifest["key_parameters"], {"alpha": 0.1})
         self.assertEqual(manifest["reproduce_command"], "python 问题1_求解.py --seed 42")
         self.assertRegex(manifest["input_files"][0]["sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(manifest["input_files"][0]["path"], "input.csv")
 
     def test_refuses_project_root_inside_skill_root(self):
         with self.assertRaisesRegex(ValueError, "PROJECT_ROOT"):
@@ -55,6 +57,17 @@ class ReproManifestTests(unittest.TestCase):
         relative = repro_manifest.SKILL_ROOT.relative_to(repro_manifest.SKILL_ROOT.parent) / "results/repro.json"
         with self.assertRaisesRegex(ValueError, "SKILL_ROOT"):
             repro_manifest.resolve_output(repro_manifest.SKILL_ROOT.parent, relative)
+
+    def test_refuses_input_outside_project_root(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as outside:
+            root = Path(tmp)
+            data = Path(outside) / "input.csv"
+            data.write_text("x\n1\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "输入文件必须位于"):
+                repro_manifest.build_manifest(
+                    inputs=[data], seed=1, parameters={}, command="python solve.py",
+                    packages=[], project_root=root,
+                )
 
     def test_can_record_matlab_runtime_and_toolboxes(self):
         manifest = repro_manifest.build_manifest(

@@ -1,0 +1,7 @@
+interface:
+  display_name: "双引擎论文搜索"
+  short_description: "通过 OpenAlex 与 AnySearch 并行检索、融合并核验可追溯论文元数据"
+  default_prompt: "使用 $paper-search 通过 OpenAlex 与 AnySearch 检索并核验相关论文。"
+
+policy:
+  allow_implicit_invocation: true

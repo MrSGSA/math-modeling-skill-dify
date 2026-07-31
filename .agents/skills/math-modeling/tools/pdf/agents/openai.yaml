@@ -1,0 +1,7 @@
+interface:
+  display_name: "PDF 工具"
+  short_description: "读取、抽取、OCR、转换、拆分、合并并校验 PDF 文档与表单"
+  default_prompt: "使用 $pdf 安全处理 PDF，并按任务需要抽取文本、表格、图片或执行转换。"
+
+policy:
+  allow_implicit_invocation: true

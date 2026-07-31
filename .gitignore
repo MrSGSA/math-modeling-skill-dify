@@ -2,6 +2,7 @@
 dify_knowledge_bridge/.env
 dify_knowledge_bridge/.venv/
 dify_knowledge_bridge/last_result.json
+knowledge_governance/
 
 # Python
 **/__pycache__/

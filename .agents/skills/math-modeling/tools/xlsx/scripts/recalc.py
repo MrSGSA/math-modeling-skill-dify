@@ -18,6 +18,15 @@ from office.soffice import get_soffice_env
 
 
 EXCEL_ERRORS = ("#VALUE!", "#DIV/0!", "#REF!", "#NAME?", "#NULL!", "#NUM!", "#N/A")
+SKILL_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _is_within(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
 
 
 def _inspect_workbook(path: Path) -> dict:
@@ -66,6 +75,8 @@ def _inspect_workbook(path: Path) -> dict:
 def recalc(filename, timeout=30):
     """重算工作簿；任何超时、非零退出或缺失输出都不会覆盖原文件。"""
     source = Path(filename).resolve()
+    if _is_within(source, SKILL_ROOT):
+        return {"error": f"拒绝修改 SKILL_ROOT 内文件: {source}"}
     if not source.exists():
         return {"error": f"文件不存在: {source}"}
     if source.suffix.lower() != ".xlsx":

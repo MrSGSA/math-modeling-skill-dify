@@ -89,6 +89,35 @@ class PdfBatchTests(unittest.TestCase):
         ])
         self.assertEqual(code, 3)
 
+    def test_rejects_nested_input_and_output_directories(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "input"
+            nested_output = source / "generated"
+            source.mkdir()
+            code = batch_convert.main([
+                "--input", str(source),
+                "--output", str(nested_output),
+                "--dry-run",
+            ])
+            self.assertEqual(code, 3)
+
+    def test_rejects_nested_markdown_and_multimodal_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "input"
+            output = root / "output"
+            nested_markdown = output / "markdown"
+            source.mkdir()
+            code = batch_convert.main([
+                "--input", str(source),
+                "--output", str(output),
+                "--markdown-output", str(nested_markdown),
+                "--dify-multimodal",
+                "--dry-run",
+            ])
+            self.assertEqual(code, 3)
+
     def test_md_only_publishes_markdown_and_discards_intermediates(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

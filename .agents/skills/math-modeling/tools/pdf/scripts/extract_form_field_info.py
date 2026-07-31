@@ -1,7 +1,9 @@
+import argparse
 import json
 import sys
 
 from pypdf import PdfReader
+from safe_paths import atomic_write_text, input_file, output_file
 
 
 
@@ -45,7 +47,7 @@ def make_field_dict(field, field_id):
 
 
 def get_field_info(reader: PdfReader):
-    fields = reader.get_fields()
+    fields = reader.get_fields() or {}
 
     field_info_by_id = {}
     possible_radio_names = set()
@@ -107,16 +109,31 @@ def get_field_info(reader: PdfReader):
     return sorted_fields
 
 
-def write_field_info(pdf_path: str, json_output_path: str):
-    reader = PdfReader(pdf_path)
+def write_field_info(pdf_path: str, json_output_path: str, overwrite=False):
+    pdf_path = input_file(pdf_path)
+    json_output_path = output_file(
+        json_output_path,
+        inputs=[pdf_path],
+        overwrite=overwrite,
+        suffixes={".json"},
+    )
+    reader = PdfReader(str(pdf_path))
     field_info = get_field_info(reader)
-    with open(json_output_path, "w") as f:
-        json.dump(field_info, f, indent=2)
+    atomic_write_text(
+        json_output_path,
+        json.dumps(field_info, ensure_ascii=False, indent=2),
+    )
     print(f"Wrote {len(field_info)} fields to {json_output_path}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: extract_form_field_info.py [input pdf] [output json]")
+    parser = argparse.ArgumentParser(description="提取 PDF 表单字段信息")
+    parser.add_argument("input_pdf")
+    parser.add_argument("output_json")
+    parser.add_argument("--overwrite", action="store_true")
+    args = parser.parse_args()
+    try:
+        write_field_info(args.input_pdf, args.output_json, overwrite=args.overwrite)
+    except (OSError, ValueError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
-    write_field_info(sys.argv[1], sys.argv[2])
